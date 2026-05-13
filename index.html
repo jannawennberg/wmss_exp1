@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Memory Experiment</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="https://unpkg.com/jspsych@7.3.4"></script>
+  <script src="jspsych_lib/jspsych-wm-stroop.js"></script>
+  <link href="jspsych_lib/jspsych.css" rel="stylesheet" type="text/css">
+  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.2.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.2.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.4"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-call-function@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
+
+  <style>
+    .jspsych-instructions-nav {
+      margin-bottom: 100px;
+    }
+
+    #consentDiv {
+      font-size: 12pt;
+      text-align: justify;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 18px;
+      border: 2px solid #aaa;
+      border-radius: 6px;
+      background: #f5f5f5;
+      font-family: monospace;
+    }
+
+    .key-mapping-table {
+      margin: 20px auto;
+      border-spacing: 24px 10px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .key-mapping-table td {
+      padding: 6px 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+
+    /* -------------------------------------------------------
+       JSPSYCH INIT
+    ------------------------------------------------------- */
+    const jsPsych = initJsPsych({
+      show_progress_bar: true,
+      auto_update_progress_bar: false,
+    });
+
+    /* -------------------------------------------------------
+       PARTICIPANT ID
+    ------------------------------------------------------- */
+    const participant_id = jsPsych.randomization.randomID(10);
+    const filename = `${participant_id}.csv`;
+    jsPsych.data.addProperties({ participant_id });
+
+    /* -------------------------------------------------------
+       STIMULUS MATERIALS
+    ------------------------------------------------------- */
+
+    // Color definitions (same values as in paper)
+    // Key mappings (for now): d=blue, f=green, j=yellow, k=red
+    const color_info = {
+      blue: { rgb: [0, 0, 255], key: 'd', css: 'rgb(0,0,255)' },
+      green: { rgb: [25, 200, 25], key: 'f', css: 'rgb(25,200,25)' },
+      yellow: { rgb: [225, 215, 40], key: 'j', css: 'rgb(225,215,40)' },
+      red: { rgb: [255, 0, 0], key: 'k', css: 'rgb(255,0,0)' },
+    };
+
+    // EXAMPLE WORDS
+    const wm_words = {
+      blue: ["sky", "ocean", "water"],
+      green: ["broccoli", "lime", "lettuce"],
+      yellow: ["banana", "lemon", "corn"],
+      red: ["strawberry", "blood", "tomato"],
+    };
+
+    // Foil probes for congruent-Stroop / mismatch WM trials
+    // (patch color = wm_word color, so probe word just needs to differ from wm_color)
+    const congruent_stroop_probes = {
+      sky: "broccoli", // blue green
+      ocean: "banana", // blue yellow
+      water: "strawberry", // blue red
+      broccoli: "sky", // green blue
+      lime: "blood", // green red
+      lettuce: "lemon", // green yellow
+      banana: "lime", // yellow green
+      lemon: "tomato", // yellow red
+      corn: "ocean", // yellow blue
+      strawberry: "water", // red blue
+      blood: "corn", // red yellow
+      tomato: "lettuce", // red green
+    };
+
+    // For incongruent AND mismatch trials, here are the probe words
+    const incongruent_probes = {
+      // blue words — probe can't be blue blue, probe can't be patch color
+      sky: { red: "broccoli", green: "lemon", yellow: "blood" },
+      ocean: { red: "lime", green: "banana", yellow: "tomato" },
+      water: { red: "lettuce", green: "corn", yellow: "strawberry" },
+
+      // green words — probe can't be green, probe can't be patch color
+      broccoli: { blue: "lemon", red: "sky", yellow: "water" },
+      lime: { blue: "corn", red: "ocean", yellow: "strawberry" },
+      lettuce: { blue: "banana", red: "water", yellow: "blood" },
+
+      // yellow words — probe can't be yellow, probe can't be patch color
+      banana: { blue: "tomato", green: "sky", red: "lettuce" },
+      lemon: { blue: "strawberry", green: "ocean", red: "lime" },
+      corn: { blue: "blood", green: "water", red: "broccoli" },
+
+      // red words — probe can't be red, probe can't match patch color
+      strawberry: { blue: "corn", green: "lemon", yellow: "sky" },
+      blood: { blue: "lettuce", green: "banana", yellow: "ocean" },
+      tomato: { blue: "lime", green: "water", yellow: "broccoli" },
+    };
+
+    // Which colors can serve as foil patches for each color
+    const other_colors = {
+      blue: ["red", "green", "yellow"],
+      green: ["blue", "red", "yellow"],
+      yellow: ["blue", "green", "red"],
+      red: ["blue", "green", "yellow"],
+    };
+
+    /* -------------------------------------------------------
+       GENERATE TRIAL TIMELINE VARIABLES (48 trials)
+    ------------------------------------------------------- */
+    function generate_timeline_variables(wm_words) {
+      const trials = [];
+      let idx = 0;
+
+      for (const [wm_color, words] of Object.entries(wm_words)) {
+        for (const wm_word of words) {
+
+          // Condition 1: stim_congruent=true, wm_congruent=true
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: wm_color,
+            wm_probe: wm_word,
+            stim_congruent: true,
+            wm_congruent: true,
+          });
+
+          // Condition 2: stim_congruent=true, wm_congruent=false
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: wm_color,
+            wm_probe: congruent_stroop_probes[wm_word],
+            stim_congruent: true,
+            wm_congruent: false,
+          });
+
+          // Condition 3: stim_congruent=false, wm_congruent=true
+          const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: patch_foil_c3,
+            wm_probe: wm_word,
+            stim_congruent: false,
+            wm_congruent: true,
+          });
+
+          // Condition 4: stim_congruent=false, wm_congruent=false
+          const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: patch_foil_c4,
+            wm_probe: incongruent_probes[wm_word][patch_foil_c4],
+            stim_congruent: false,
+            wm_congruent: false,
+          });
+        }
+      }
+      return trials;
+    }
+
+    const all_trials = generate_timeline_variables(wm_words);
+
+    /* -------------------------------------------------------
+       PRACTICE TRIALS (10 fixed trials, one per condition
+       mix, covering all 4 colors)
+    ------------------------------------------------------- */
+    const practice_trials = [
+      { wm_color: "blue", wm_word: "sky", patch_color: "blue", wm_probe: "sky", stim_congruent: true, wm_congruent: true },
+      { wm_color: "green", wm_word: "broccoli", patch_color: "red", wm_probe: "broccoli", stim_congruent: false, wm_congruent: true },
+      { wm_color: "yellow", wm_word: "banana", patch_color: "yellow", wm_probe: "lime", stim_congruent: true, wm_congruent: false },
+      { wm_color: "red", wm_word: "strawberry", patch_color: "blue", wm_probe: "corn", stim_congruent: false, wm_congruent: false },
+      { wm_color: "blue", wm_word: "ocean", patch_color: "green", wm_probe: "ocean", stim_congruent: false, wm_congruent: true },
+      { wm_color: "green", wm_word: "lime", patch_color: "green", wm_probe: "lime", stim_congruent: true, wm_congruent: true },
+      { wm_color: "yellow", wm_word: "lemon", patch_color: "yellow", wm_probe: "lemon", stim_congruent: true, wm_congruent: true },
+      { wm_color: "red", wm_word: "tomato", patch_color: "red", wm_probe: "banana", stim_congruent: true, wm_congruent: false },
+      { wm_color: "blue", wm_word: "water", patch_color: "blue", wm_probe: "water", stim_congruent: true, wm_congruent: true },
+      { wm_color: "green", wm_word: "lettuce", patch_color: "yellow", wm_probe: "blood", stim_congruent: false, wm_congruent: false },
+    ];
+
+    /* -------------------------------------------------------
+       TIMELINE
+    ------------------------------------------------------- */
+    const timeline = [];
+    const n_main_trials = all_trials.length; // 48
+
+    // --- Fullscreen ---
+    timeline.push({
+      type: jsPsychFullscreen,
+      fullscreen_mode: true,
+    });
+
+    // --- Welcome ---
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p><strong>Welcome to the Memory Experiment!</strong></p>
+        <p>This study will take approximately 10-15 minutes.</p>
+        <p><strong>To complete this experiment, you must be on a laptop or desktop computer with a physical keyboard.</strong></p>
+        <p>Press "Continue" to the Consent Form.</p>
+      `,
+      choices: ["Continue"],
+    });
+
+    // --- Consent placeholder ---
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <div id="consentDiv">
+          <p><strong>Informed Consent</strong></p>
+          <p>This is a study conducted on working memory for a course project. All data collected will be kept confidential and anonymous, and used only for academic purposes. Participation in this study is entirely voluntary, and you may choose to stop and withdraw at any point without penalty. The task will take approximately 10-15 minutes to complete.</p>
+
+          <p>There are minimal risks from participating in this study. Participants may experience boredom, fatigue, or frustration from the large number of repetitive trials. In addition, the working memory task may create cognitive load that causes discomfort for some participants. Participants who have photosensitive epilepsy or other vision-related problems may have negative reactions to the flashing stimuli. Other bodily risks include eye strain and wrist pain that comes from responding to the online task for an extended amount of time. These risks do not exceed the risks a person may encounter in their daily lives.</p>
+
+          <p>This study may contribute to a better understanding of how information held in working memory influences perception. By extending prior research on the Stroop effect, which has primarily focused on direct color words, this study may benefit the field by examining whether moderate semantic associations are sufficient to produce similar interference effects. There is no direct compensation provided for participation in this study.</p>
+
+          <p>Continuing this study indicates that you consent to participating in this study.</p>
+
+          <p>By clicking <strong>I Agree</strong> you confirm that you are <strong>on a device with a physical keyboard</strong>, you are at least <strong>18 years old</strong>, you are <strong>fluent in English</strong>, you have normal or corrected-to-normal <strong>color vision</strong>, and you <strong>do not have photosensitive epilepsy.</strong></p>
+
+          <p>If you do not consent to participate, feel free to close the experiment in your internet browser. Your data will not be recorded.</p>
+        </div>
+      `,
+      choices: ["I Agree"],
+    });
+
+    // --- Task instructions ---
+    timeline.push({
+      type: jsPsychInstructions,
+      pages: [
+        `<p><strong>Task Overview</strong></p>
+         <p>In this experiment, you will complete a <strong>working memory color task</strong>.</p>
+         <p>Each trial has three parts:</p>
+         <ol style="text-align:left; display:inline-block;">
+           <li>You will see a <strong>word</strong> — your job is to remember it!</li>
+           <li>Next, a <strong>colored rectangle</strong> will briefly appear. You will then press a key to indicate its color as quickly and accurately as possible.</li>
+           <li>Finally, a <strong>test word</strong> will appear. Press <kbd>G</kbd> if it matches the word you saw at the start, or <kbd>H</kbd> if it does not.</li>
+         </ol>
+         <p>In sum, on each trial, you will make two responses: the first response is to judge the color of the patch. The second response is to indicate whether the word displayed matches the word you saw at the start of the trial.</p>
+         <p>Click "Next" to learn the color key mappings.</p>`,
+
+        `<p><strong>Color Key Mappings</strong></p>
+         <p>Press the key that matches the color of the rectangle:</p>
+         <table class="key-mapping-table">
+           <tr>
+             <td><span style="color:rgb(0,0,255); font-size:48px;">■</span></td>
+             <td><span style="color:rgb(25,200,25); font-size:48px;">■</span></td>
+             <td><span style="color:rgb(225,215,40); font-size:48px;">■</span></td>
+             <td><span style="color:rgb(255,0,0); font-size:48px;">■</span></td>
+           </tr>
+           <tr>
+             <td><kbd>D</kbd><br>Blue</td>
+             <td><kbd>F</kbd><br>Green</td>
+             <td><kbd>J</kbd><br>Yellow</td>
+             <td><kbd>K</kbd><br>Red</td>
+           </tr>
+         </table>
+         <p>For the memory test at the end of each trial:<br>
+           <kbd>G</kbd> = Same &nbsp;&nbsp; <kbd>H</kbd> = Different
+         </p>
+         <p>Click "Next" to practice the color keys.</p>`,
+      ],
+      show_clickable_nav: true,
+      button_label_next: "Next",
+      button_label_previous: "Back",
+    });
+
+    /* -------------------------------------------------------
+       KEY MAPPING TRAINING
+       Shows each color patch one at a time; participant must
+       press the correct key before moving on.
+    ------------------------------------------------------- */
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>Learn these key mappings:</p>
+        <table class="key-mapping-table">
+            <tr>
+                <td><div style="width:80px; height:60px; background-color:rgb(0,0,255);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(25,200,25);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(225,215,40);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(255,0,0);"></div></td>
+            </tr>
+            <tr>
+                <td><kbd>D</kbd> Blue</td>
+                <td><kbd>F</kbd> Green</td>
+                <td><kbd>J</kbd> Yellow</td>
+                <td><kbd>K</kbd> Red</td>
+            </tr>
+        </table>
+    `,
+      choices: ["I've got it, test me!"],
+    });
+    const key_training_trials = [
+      { stimulus: `<p>What color is this?</p><div style="width:200px; height:150px; background-color:rgb(0,0,255); margin:20px auto;"></div>`, correct_key: 'd' },
+      { stimulus: `<p>What color is this?</p><div style="width:200px; height:150px; background-color:rgb(25,200,25); margin:20px auto;"></div>`, correct_key: 'f' },
+      { stimulus: `<p>What color is this?</p><div style="width:200px; height:150px; background-color:rgb(225,215,40); margin:20px auto;"></div>`, correct_key: 'j' },
+      { stimulus: `<p>What color is this?</p><div style="width:200px; height:150px; background-color:rgb(255,0,0); margin:20px auto;"></div>`, correct_key: 'k' },
+    ];
+
+    var key_training_block = {
+      timeline: [
+        // Show the patch, wait for keypress
+        {
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: jsPsych.timelineVariable('stimulus'),
+          choices: ['d', 'f', 'j', 'k'],
+          on_finish: function (data) {
+            data.correct = (data.response === jsPsych.timelineVariable('correct_key'));
+          }
+        },
+        // Show feedback immediately after
+        {
+          type: jsPsychHtmlKeyboardResponse,
+          stimulus: function () {
+            const last = jsPsych.data.get().last(1).values()[0];
+            if (last.correct) {
+              return `<p style="color: black; font-size: 32px;">✓ Correct!</p>`;
+            } else {
+              const correct_key = jsPsych.timelineVariable('correct_key');
+              const color_name = { 'd': 'Blue', 'f': 'Green', 'j': 'Yellow', 'k': 'Red' }[correct_key];
+              return `<p style="color: black; font-size: 32px;">✗ Incorrect!</p>
+                            <p>The correct key for this color is <kbd>${correct_key.toUpperCase()}</kbd> (${color_name})</p>`;
+            }
+          },
+          choices: [],
+          trial_duration: 1000,  // show feedback for 1 second then move on
+        }
+      ],
+      timeline_variables: key_training_trials,
+      repetitions: 5,
+      randomize_order: true,
+    };
+
+    timeline.push(key_training_block)
+
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>Great! Now you'll do a short <strong>practice</strong> with the full task.</p>
+        <p>You will receive feedback after each trial during practice.</p>
+        <p>Remember:</p>
+        <ul style="text-align:left; display:inline-block;">
+          <li>Remember the <strong>word</strong> at the start of each trial.</li>
+          <li>Press the <strong>color key</strong> (D/F/J/K) when the rectangle appears.</li>
+          <li>Press <strong>G</strong> (same) or <strong>H</strong> (different) for the word memory test.</li>
+        </ul>
+      `,
+      choices: ["Start Practice"],
+    });
+
+    /* -------------------------------------------------------
+       PRACTICE BLOCK (10 trials, with feedback)
+    ------------------------------------------------------- */
+    var practice_block = {
+      timeline: [{
+        type: jsPsychWMStroop,
+        is_practice: true,
+        // slower presentation during practice trials
+        wm_sample_time: 1500,
+        color_patch_time: 1000,
+        wm_response_time: 4000,
+
+        wm_word: jsPsych.timelineVariable('wm_word'),
+        wm_color: jsPsych.timelineVariable('wm_color'),
+        patch_color: jsPsych.timelineVariable('patch_color'),
+        wm_probe: jsPsych.timelineVariable('wm_probe'),
+        stim_congruent: jsPsych.timelineVariable('stim_congruent'),
+        wm_congruent: jsPsych.timelineVariable('wm_congruent'),
+      }],
+      timeline_variables: practice_trials,
+      randomize_order: true,
+    };
+
+    timeline.push(practice_block);
+
+    // Transition from practice to main task
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p><strong>Practice complete!</strong></p>
+        <p>The main experiment will now begin. There are <strong>48 trials</strong> split into two blocks of 24.</p>
+        <p>You will <strong>not</strong> receive feedback during the main task.</p>
+        <p>Take a moment to review the key mappings if needed:</p>
+        <table class="key-mapping-table">
+          <tr>
+            <td><span style="color:rgb(0,0,255); font-size:40px;">■</span></td>
+            <td><span style="color:rgb(25,200,25); font-size:40px;">■</span></td>
+            <td><span style="color:rgb(225,215,40); font-size:40px;">■</span></td>
+            <td><span style="color:rgb(255,0,0); font-size:40px;">■</span></td>
+          </tr>
+          <tr>
+            <td><kbd>D</kbd> Blue</td>
+            <td><kbd>F</kbd> Green</td>
+            <td><kbd>J</kbd> Yellow</td>
+            <td><kbd>K</kbd> Red</td>
+          </tr>
+        </table>
+        <p><kbd>G</kbd> = Same &nbsp;&nbsp; <kbd>H</kbd> = Different</p>
+      `,
+      choices: ["Begin Experiment"],
+    });
+
+    /* -------------------------------------------------------
+       MAIN TASK — split into two blocks of 24
+    ------------------------------------------------------- */
+    var trial_count = 0;
+    var updateCounter = () => {
+      trial_count++;
+      jsPsych.setProgressBar(trial_count / n_main_trials);
+    };
+
+    // Randomize all 48 trials then split into two halves
+    const shuffled_trials = jsPsych.randomization.shuffle(all_trials);
+    const block1_trials = shuffled_trials.slice(0, 24);
+    const block2_trials = shuffled_trials.slice(24, 48);
+
+    var block1 = {
+      timeline: [{
+        type: jsPsychWMStroop,
+        is_practice: false,
+        wm_word: jsPsych.timelineVariable('wm_word'),
+        wm_color: jsPsych.timelineVariable('wm_color'),
+        patch_color: jsPsych.timelineVariable('patch_color'),
+        wm_probe: jsPsych.timelineVariable('wm_probe'),
+        stim_congruent: jsPsych.timelineVariable('stim_congruent'),
+        wm_congruent: jsPsych.timelineVariable('wm_congruent'),
+        task_trial_index: jsPsych.timelineVariable('task_trial_index'),
+        on_finish: updateCounter,
+      }],
+      timeline_variables: block1_trials,
+    };
+
+    var block2 = {
+      timeline: [{
+        type: jsPsychWMStroop,
+        is_practice: false,
+        wm_word: jsPsych.timelineVariable('wm_word'),
+        wm_color: jsPsych.timelineVariable('wm_color'),
+        patch_color: jsPsych.timelineVariable('patch_color'),
+        wm_probe: jsPsych.timelineVariable('wm_probe'),
+        stim_congruent: jsPsych.timelineVariable('stim_congruent'),
+        wm_congruent: jsPsych.timelineVariable('wm_congruent'),
+        task_trial_index: jsPsych.timelineVariable('task_trial_index'),
+        on_finish: updateCounter,
+      }],
+      timeline_variables: block2_trials,
+    };
+
+    timeline.push(block1);
+
+    // Midpoint break
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p><strong>You're halfway through!</strong></p>
+        <p>Feel free to take a short break.</p>
+        <p>When you're ready, click "Continue" to start the second block.</p>
+      `,
+      choices: ["Continue"],
+    });
+
+    // Remind people of the key mappings
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p>As a reminder, here are the key mappings:</p>
+        <table class="key-mapping-table">
+            <tr>
+                <td><div style="width:80px; height:60px; background-color:rgb(0,0,255);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(25,200,25);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(225,215,40);"></div></td>
+                <td><div style="width:80px; height:60px; background-color:rgb(255,0,0);"></div></td>
+            </tr>
+            <tr>
+                <td><kbd>D</kbd> Blue</td>
+                <td><kbd>F</kbd> Green</td>
+                <td><kbd>J</kbd> Yellow</td>
+                <td><kbd>K</kbd> Red</td>
+            </tr>
+        </table>
+    `,
+      choices: ["Got it!"],
+    });
+
+    timeline.push(block2);
+
+    /* -------------------------------------------------------
+       DEMOGRAPHICS
+    ------------------------------------------------------- */
+    timeline.push({
+      type: jsPsychSurveyText,
+      questions: [
+        { prompt: "What is your age? If you do not wish to answer, type 'decline'", name: "age", required: true },
+        { prompt: "What is your gender?  If you do not wish to answer, type 'decline'", name: "gender", required: true },
+      ],
+      button_label: "Submit",
+    });
+
+    timeline.push({
+      type: jsPsychPipe,
+      action: "save",
+      experiment_id: "nOzneBoLKNCo",
+      filename: filename,
+      data_string: () => jsPsych.data.get().csv()
+    });
+
+    /* -------------------------------------------------------
+       END SCREEN
+    ------------------------------------------------------- */
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <p><strong>Thank you for participating!</strong></p>
+        <p>Your responses have been recorded.</p>
+      `,
+      choices: ["Finish"],
+    });
+
+    // Exit fullscreen
+    timeline.push({
+      type: jsPsychFullscreen,
+      fullscreen_mode: false,
+    });
+
+    timeline.push({
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <p>You may now close this window!</p>
+      `,
+      choices: [],
+    });
+
+    jsPsych.run(timeline);
+
+  </script>
+</body>
+
+</html>

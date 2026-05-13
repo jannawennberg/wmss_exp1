@@ -1,0 +1,4 @@
+## ignoring by default
+.DS_Store
+.Rproj.user
+.Rhistory
