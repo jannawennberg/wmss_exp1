@@ -162,7 +162,7 @@
     /* -------------------------------------------------------
        GENERATE TRIAL TIMELINE VARIABLES (XX trials)
     ------------------------------------------------------- */
-    function generate_timeline_variables_original(wm_words){
+    function generate_timeline_variables_original(wm_words_original){
       const trials_original = [];
       let idx = 0;
 
@@ -170,7 +170,7 @@
         for (const wm_word of words) {
 
           // Condition 1: stim_congruent=true, wm_congruent=true
-          trials.push({
+          trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: wm_color,
@@ -181,7 +181,7 @@
 
           // Condition 2: stim_congruent=true, wm_congruent=false
           const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1);
-          trials.push({
+          trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: wm_color,
@@ -192,7 +192,7 @@
 
           // Condition 3: stim_congruent=false, wm_congruent=true
           const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials.push({
+          trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: patch_foil_c3,
@@ -204,7 +204,7 @@
           // Condition 4: stim_congruent=false, wm_congruent=false
           const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
           const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4],1);
-          trials.push({
+          trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: patch_foil_c4,
@@ -217,7 +217,7 @@
       return trials_original
     }
 
-    function generate_timeline_variables_semantic(wm_words) {
+    function generate_timeline_variables_semantic(wm_words_semantic) {
       const trials_semantic = [];
       let idx = 0;
       
@@ -225,7 +225,7 @@
         for (const wm_word of words) {
 
           // Condition 1: stim_congruent=true, wm_congruent=true
-          trials.push({
+          trials_semantic.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: wm_color,
@@ -235,7 +235,7 @@
           });
 
           // Condition 2: stim_congruent=true, wm_congruent=false
-          trials.push({
+          trials_semantic.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: wm_color,
@@ -246,7 +246,7 @@
 
           // Condition 3: stim_congruent=false, wm_congruent=true
           const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials.push({
+          trials_semantic.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: patch_foil_c3,
@@ -257,7 +257,7 @@
 
           // Condition 4: stim_congruent=false, wm_congruent=false
           const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials.push({
+          trials_semantic.push({
             task_trial_index: idx++,
             wm_color, wm_word,
             patch_color: patch_foil_c4,
@@ -273,7 +273,7 @@
     const all_trials = [];
     const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
     const all_trials_original = generate_timeline_variables_original(wm_words_original);
-    all_trials.push(all_trials_semantic, all_trials_original)
+    all_trials.push(all_trials_semantic, all_trials_original);
 
     /* -------------------------------------------------------
        PRACTICE TRIALS (10 fixed trials, one per condition
