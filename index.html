@@ -162,9 +162,10 @@
     /* -------------------------------------------------------
        GENERATE TRIAL TIMELINE VARIABLES (XX trials)
     ------------------------------------------------------- */
-    function generate_timeline_variables(wm_words) {
-      const trials = [];
+    function generate_timeline_variables_original(wm_words){
+      const trials_original = [];
       let idx = 0;
+
       for (const [wm_color, words] of Object.entries(wm_words_original)) {
         for (const wm_word of words) {
 
@@ -213,7 +214,13 @@
           });
         }
       }
+      return trials_original
+    }
 
+    function generate_timeline_variables_semantic(wm_words) {
+      const trials_semantic = [];
+      let idx = 0;
+      
       for (const [wm_color, words] of Object.entries(wm_words_semantic)) {
         for (const wm_word of words) {
 
@@ -260,10 +267,13 @@
           });
         }
       }
-      return trials;
+      return trials_semantic;
     }
 
-    const all_trials = generate_timeline_variables(wm_words);
+    const all_trials = [];
+    const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
+    const all_trials_original = generate_timeline_variables_original(wm_words_original);
+    all_trials.push(all_trials_semantic, all_trials_original)
 
     /* -------------------------------------------------------
        PRACTICE TRIALS (10 fixed trials, one per condition
