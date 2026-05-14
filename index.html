@@ -274,6 +274,8 @@
     const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
     const all_trials_original = generate_timeline_variables_original(wm_words_original);
     all_trials.push(all_trials_semantic, all_trials_original);
+    console.log(all_trials_semantic[1]);
+    console.log(all_trials[1]);
 
     /* -------------------------------------------------------
        PRACTICE TRIALS (10 fixed trials, one per condition
@@ -299,6 +301,7 @@
     const n_main_trials = all_trials.length; // 48
 
     // --- Fullscreen ---
+    /*
     timeline.push({
       type: jsPsychFullscreen,
       fullscreen_mode: true,
@@ -384,6 +387,7 @@
        Shows each color patch one at a time; participant must
        press the correct key before moving on.
     ------------------------------------------------------- */
+    /*
     timeline.push({
       type: jsPsychHtmlButtonResponse,
       stimulus: `
@@ -462,10 +466,12 @@
       `,
       choices: ["Start Practice"],
     });
+    /*
 
     /* -------------------------------------------------------
        PRACTICE BLOCK (10 trials, with feedback)
     ------------------------------------------------------- */
+    /*
     var practice_block = {
       timeline: [{
         type: jsPsychWMStroop,
@@ -487,6 +493,7 @@
     };
 
     //timeline.push(practice_block);
+    /*
 
     // Transition from practice to main task
     timeline.push({
