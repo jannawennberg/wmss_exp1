@@ -180,7 +180,7 @@
           });
 
           // Condition 2: stim_congruent=true, wm_congruent=false
-          const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1);
+          const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1)[0];
           trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
@@ -203,7 +203,7 @@
 
           // Condition 4: stim_congruent=false, wm_congruent=false
           const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4],1);
+          const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4],1)[0];
           trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
