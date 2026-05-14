@@ -81,17 +81,24 @@
       red: { rgb: [255, 0, 0], key: 'k', css: 'rgb(255,0,0)' },
     };
 
-    // EXAMPLE WORDS
-    const wm_words = {
+    // Word lists
+    const wm_words_semantic = {
       blue: ["sky", "ocean", "water"],
       green: ["broccoli", "lime", "lettuce"],
       yellow: ["banana", "lemon", "corn"],
       red: ["strawberry", "blood", "tomato"],
     };
 
+    const wm_words_original = {
+      blue: ["blue"],
+      green: ["green"],
+      yellow: ["yellow"],
+      red: ["red"],
+    };
+
     // Foil probes for congruent-Stroop / mismatch WM trials
     // (patch color = wm_word color, so probe word just needs to differ from wm_color)
-    const congruent_stroop_probes = {
+    const congruent_stroop_probes_semantic = {
       sky: "broccoli", // blue green
       ocean: "banana", // blue yellow
       water: "strawberry", // blue red
@@ -106,8 +113,15 @@
       tomato: "lettuce", // red green
     };
 
+    const congruent_stroop_probes_original = {
+      blue: ["green","yellow","red"],
+      green: ["blue","yellow","red"],
+      yellow: ["blue","green","red"],
+      red: ["blue","green","yellow"]
+    };
+
     // For incongruent AND mismatch trials, here are the probe words
-    const incongruent_probes = {
+    const incongruent_probes_semantic = {
       // blue words — probe can't be blue blue, probe can't be patch color
       sky: { red: "broccoli", green: "lemon", yellow: "blood" },
       ocean: { red: "lime", green: "banana", yellow: "tomato" },
@@ -129,6 +143,14 @@
       tomato: { blue: "lime", green: "water", yellow: "broccoli" },
     };
 
+    const incongruent_probes_original = {
+      // blue words — probe can't be blue blue, probe can't be patch color
+      blue: { green: ["yellow", "red"], yellow: ["green", "red"], red: ["green", "yellow"] },
+      green: { blue: ["yellow", "red"], yellow: ["blue", "red"], red: ["blue","yellow"] },
+      yellow: { blue: ["green", "red"], green : ["blue", "red"], red: ["blue", "green"] },
+      red: { blue: ["green", "yellow"], green : ["blue", "yellow"], yellow: ["blue", "green"] }
+    };
+
     // Which colors can serve as foil patches for each color
     const other_colors = {
       blue: ["red", "green", "yellow"],
@@ -138,13 +160,61 @@
     };
 
     /* -------------------------------------------------------
-       GENERATE TRIAL TIMELINE VARIABLES (48 trials)
+       GENERATE TRIAL TIMELINE VARIABLES (XX trials)
     ------------------------------------------------------- */
     function generate_timeline_variables(wm_words) {
       const trials = [];
       let idx = 0;
+      for (const [wm_color, words] of Object.entries(wm_words_original)) {
+        for (const wm_word of words) {
 
-      for (const [wm_color, words] of Object.entries(wm_words)) {
+          // Condition 1: stim_congruent=true, wm_congruent=true
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: wm_color,
+            wm_probe: wm_word,
+            stim_congruent: true,
+            wm_congruent: true,
+          });
+
+          // Condition 2: stim_congruent=true, wm_congruent=false
+          const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1);
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: wm_color,
+            wm_probe: curr_wm_probe_cong,
+            stim_congruent: true,
+            wm_congruent: false,
+          });
+
+          // Condition 3: stim_congruent=false, wm_congruent=true
+          const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: patch_foil_c3,
+            wm_probe: wm_word,
+            stim_congruent: false,
+            wm_congruent: true,
+          });
+
+          // Condition 4: stim_congruent=false, wm_congruent=false
+          const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+          const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4],1);
+          trials.push({
+            task_trial_index: idx++,
+            wm_color, wm_word,
+            patch_color: patch_foil_c4,
+            wm_probe: curr_wm_probe_incong,
+            stim_congruent: false,
+            wm_congruent: false,
+          });
+        }
+      }
+
+      for (const [wm_color, words] of Object.entries(wm_words_semantic)) {
         for (const wm_word of words) {
 
           // Condition 1: stim_congruent=true, wm_congruent=true
@@ -362,7 +432,7 @@
         }
       ],
       timeline_variables: key_training_trials,
-      repetitions: 5,
+      repetitions: 1,
       randomize_order: true,
     };
 
@@ -406,7 +476,7 @@
       randomize_order: true,
     };
 
-    timeline.push(practice_block);
+    //timeline.push(practice_block);
 
     // Transition from practice to main task
     timeline.push({
@@ -446,8 +516,8 @@
 
     // Randomize all 48 trials then split into two halves
     const shuffled_trials = jsPsych.randomization.shuffle(all_trials);
-    const block1_trials = shuffled_trials.slice(0, 24);
-    const block2_trials = shuffled_trials.slice(24, 48);
+    //const block1_trials = shuffled_trials.slice(0, 24);
+    //const block2_trials = shuffled_trials.slice(24, 48);
 
     var block1 = {
       timeline: [{
@@ -462,9 +532,10 @@
         task_trial_index: jsPsych.timelineVariable('task_trial_index'),
         on_finish: updateCounter,
       }],
-      timeline_variables: block1_trials,
+      //timeline_variables: block1_trials,
+      timeline_variables: shuffled_trials
     };
-
+    /*
     var block2 = {
       timeline: [{
         type: jsPsychWMStroop,
@@ -480,6 +551,7 @@
       }],
       timeline_variables: block2_trials,
     };
+    */
 
     timeline.push(block1);
 
@@ -517,7 +589,7 @@
       choices: ["Got it!"],
     });
 
-    timeline.push(block2);
+    //timeline.push(block2);
 
     /* -------------------------------------------------------
        DEMOGRAPHICS
