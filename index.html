@@ -180,7 +180,6 @@
           });
 
           // Condition 2: stim_congruent=true, wm_congruent=false
-          /*
           const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1)[0];
           console.log(curr_wm_probe_cong);
           trials_original.push({
@@ -214,7 +213,6 @@
             stim_congruent: false,
             wm_congruent: false,
           });
-          */
         }
       }
       return trials_original
@@ -273,12 +271,9 @@
       return trials_semantic;
     }
 
-    const all_trials = [];
     const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
     const all_trials_original = generate_timeline_variables_original(wm_words_original);
-    all_trials.push(all_trials_semantic, all_trials_original);
-    console.log(all_trials_semantic[1]);
-    console.log(all_trials[1]);
+    const all_trials = [...all_trials_semantic, ...all_trials_original];
 
     /* -------------------------------------------------------
        PRACTICE TRIALS (10 fixed trials, one per condition
