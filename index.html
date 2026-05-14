@@ -181,6 +181,7 @@
 
           // Condition 2: stim_congruent=true, wm_congruent=false
           const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1)[0];
+          console.log(curr_wm_probe_cong);
           trials_original.push({
             task_trial_index: idx++,
             wm_color, wm_word,
