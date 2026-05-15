@@ -6,7 +6,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="https://unpkg.com/jspsych@7.3.4"></script>
   <script src="jspsych_lib/jspsych-wm-stroop.js"></script>
-  <link href="jspsych_lib/jspsych.css" rel="stylesheet" type="text/css">
+  <script src="jspsych_lib/jspsych.css" rel="stylesheet" type="text/css"></script>
+  <script src="jspsych_lib/questionnaires.js"></script>
   <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
   <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
   <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
@@ -46,6 +47,30 @@
 
     .key-mapping-table td {
       padding: 6px 12px;
+    }
+
+      /* Custom style for vviq instructions */
+    .vviq-instructions {
+      font-weight: bold;
+      font-size: larger;
+      margin-bottom: 20px;
+    }
+
+    /*Add some space from the bottom of likert button*/
+    #jspsych-survey-likert-next{
+      margin-bottom: 20px;
+    }
+
+    /*Keep likert scales consistent for each page using width*/
+    #jspsych-survey-likert-form{
+      display: inline-block;
+      width: 700px;
+      max-width: 700px;;
+    }
+
+    /*Add some space from the bottom of vviq button*/
+    #jspsych-survey-multi-choice-next{
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -607,16 +632,70 @@
     //timeline.push(block2);
 
     /* -------------------------------------------------------
-       DEMOGRAPHICS
+       IMAGERY QUESTIONNAIRES
     ------------------------------------------------------- */
     timeline.push({
-      type: jsPsychSurveyText,
-      questions: [
-        { prompt: "What is your age? If you do not wish to answer, type 'decline'", name: "age", required: true },
-        { prompt: "What is your gender?  If you do not wish to answer, type 'decline'", name: "gender", required: true },
-      ],
-      button_label: "Submit",
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '<p><b>Welcome to the second part of the study!</b></p><p>In this section, you will be presented with a series of statements. Please indicate your level of agreement or disagreement with each one.</p>',
+      choices: ['Continue'],
+
+      on_start: function() {
+      // reset progress bar
+      jsPsych.setProgressBar(0);
+      },
     });
+
+    // Shuffle the questionnaire arrays and chunk into sections
+    shuffleArray(osivq);
+    // Chunk osivq items into groups of 5 and add to timeline
+    while (osivq.length > 0) {
+      let itemsChunk = osivq.splice(0, 6); // Get next chunk of 5 items
+      timeline.push(generateOsivqTrial(itemsChunk));
+    }
+
+    // Shuffle IRQ questions
+    shuffleArray(irq); // Shuffle the items initially
+
+    // Chunk items into groups of 4 and add to timeline
+    while (irq.length > 0) {
+      let itemsChunk = irq.splice(0, 5); // Get next chunk of 4 items
+      timeline.push(generateIrqTrial(itemsChunk));
+    }
+
+    // VVIQ Instructions
+    timeline.push({
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+      <p>Please read the instructions before moving to the next page.</p>
+      <p>Visual imagery refers to the ability to visualize, that is, the ability to form mental pictures, or to “see in the mind\'s eye.”</p>
+      <p>The aim of this test is to determine the vividness of your visual imagery. The items of the test will possibly bring certain images to your mind.</p>
+      <p>You are asked to rate the vividness of each image by reference to the 5-point scale given below: '
+        <ul>
+          <li>1: No image at all</li>
+          <li>2: Vague and dim</li>
+          <li>3: Moderately clear and vivid</li>
+          <li>4: Reasonably clear and vivid</li>
+          <li>5: Perfectly clear & vivid as if I was actually seeing it</li>
+        <ul>
+      <p>After reading each item, close your eyes for a moment, try to visualize the item, and then open your eyes and rate the item.</p>
+      `,
+      choices: ['Continue']
+    });
+
+    // Instruction messages for each VVIQ screen
+    const vviqInstructions = [
+      "In answering items 1 to 4, think of some relative or friend whom you frequently see and consider carefully the picture that comes your mind’s eye.",
+      "In answering items 5 to 8, visualize a sun. Consider the picture that comes before you in your mind's eye.",
+      "In answering items 9 to 12, think of the front of a shop you often go to. Consider the picture that comes before you in your mind's eye.",
+      "Finally, think of the front of a country scene which involves trees, mountains, and a lake. Consider the picture that comes before you mind's eye."
+    ];
+
+    // Adjust the loop to chunk VVIQ items into groups of 4 and add to timeline with instructions
+    for (let i = 0; i < vviq.length; i += 4) {
+        let itemsChunk = vviq.slice(i, i + 4); // Use slice to avoid modifying the original array
+        let instructionIndex = i / 4; // Calculate instruction index based on the current chunk
+        timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
+    }
 
     timeline.push({
       type: jsPsychPipe,
@@ -634,6 +713,7 @@
       stimulus: `
         <p><strong>Thank you for participating!</strong></p>
         <p>Your responses have been recorded.</p>
+        <p>Click "Back to SONA" to be taken back to SONA and to receive credit</p>
       `,
       choices: ["Finish"],
     });
@@ -653,6 +733,91 @@
     });
 
     jsPsych.run(timeline);
+
+    /* -------------------------------------------------------
+       Imagery helper functions
+    ------------------------------------------------------- */
+    // Shuffle the items array
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+      }
+    }
+
+    // Function to generate a trial for a chunk of osivq items
+    function generateOsivqTrial(itemsChunk) {
+      return {
+        type: jsPsychSurveyLikert,
+        questions: itemsChunk.map(item => ({
+          prompt: item.item,
+          labels: ['1', '2', '3', '4', '5'],
+          required: true
+        })),
+        on_finish: function(data) {
+          // Attach additional data to the data object
+          data.item_ids = itemsChunk.map(i => i.item_id);
+          data.items = itemsChunk.map(i => i.item);
+          data.categories = itemsChunk.map(i => i.category);
+          data.questionnaires = itemsChunk.map(i => i.questionnaire);
+
+          //set progress bar value
+          var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+          jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
+
+        }
+      };
+    }
+
+    /// Function to generate a trial for a chunk of items
+    function generateIrqTrial(itemsChunk) {
+      return {
+        type: jsPsychSurveyLikert,
+        questions: itemsChunk.map(item => ({
+          prompt: item.item,
+          labels: ['1', '2', '3', '4', '5'],
+          required: true
+        })),
+        on_finish: function(data) {
+          data.item_ids = itemsChunk.map(i => i.item_id);
+          data.items = itemsChunk.map(i => i.item);
+          data.categories = itemsChunk.map(i => i.category);
+          data.questionnaires = itemsChunk.map(i => i.questionnaire);
+
+          //set progress bar value
+          var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+          jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
+          
+        }
+      };
+    }
+
+    function generateVVIQTrial(itemsChunk, instructionIndex) {
+        return {
+            type: jsPsychSurveyMultiChoice,
+            preamble: `<div class="vviq-instructions">${vviqInstructions[instructionIndex]}</div>`, // Include the prompt
+            questions: itemsChunk.map(item => ({
+                prompt: item.item,
+                options: ['No image at all, I only "know" I am thinking of the object',
+                          'Dim and vague image',
+                          'Moderately realistic and vivid',
+                          'Realistic and reasonably vivid',
+                          'Perfectly realistic, as vivid as real seeing'],
+                required: true
+            })),
+            on_finish: function(data) {
+                // Data processing
+                data.item_ids = itemsChunk.map(i => i.item_id);
+                data.items = itemsChunk.map(i => i.item);
+                data.categories = itemsChunk.map(i => i.category);
+                data.questionnaires = itemsChunk.map(i => i.questionnaire);
+
+                //set progress bar value
+                var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+                jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
+            }
+        };
+    }
 
   </script>
 </body>
