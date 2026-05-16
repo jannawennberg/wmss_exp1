@@ -60,19 +60,20 @@
     }
 
     /*Add some space from the bottom of likert button*/
-    #jspsych-survey-likert-next{
+    #jspsych-survey-likert-next {
       margin-bottom: 20px;
     }
 
     /*Keep likert scales consistent for each page using width*/
-    #jspsych-survey-likert-form{
+    #jspsych-survey-likert-form {
       display: inline-block;
       width: 700px;
-      max-width: 700px;;
+      max-width: 700px;
+      ;
     }
 
     /*Add some space from the bottom of vviq button*/
-    #jspsych-survey-multi-choice-next{
+    #jspsych-survey-multi-choice-next {
       margin-bottom: 20px;
     }
   </style>
@@ -142,10 +143,10 @@
     };
 
     const congruent_stroop_probes_original = {
-      blue: ["green","yellow","red"],
-      green: ["blue","yellow","red"],
-      yellow: ["blue","green","red"],
-      red: ["blue","green","yellow"]
+      blue: ["green", "yellow", "red"],
+      green: ["blue", "yellow", "red"],
+      yellow: ["blue", "green", "red"],
+      red: ["blue", "green", "yellow"]
     };
 
     // For incongruent AND mismatch trials, here are the probe words
@@ -174,9 +175,9 @@
     const incongruent_probes_original = {
       // blue words — probe can't be blue blue, probe can't be patch color
       blue: { green: ["yellow", "red"], yellow: ["green", "red"], red: ["green", "yellow"] },
-      green: { blue: ["yellow", "red"], yellow: ["blue", "red"], red: ["blue","yellow"] },
-      yellow: { blue: ["green", "red"], green : ["blue", "red"], red: ["blue", "green"] },
-      red: { blue: ["green", "yellow"], green : ["blue", "yellow"], yellow: ["blue", "green"] }
+      green: { blue: ["yellow", "red"], yellow: ["blue", "red"], red: ["blue", "yellow"] },
+      yellow: { blue: ["green", "red"], green: ["blue", "red"], red: ["blue", "green"] },
+      red: { blue: ["green", "yellow"], green: ["blue", "yellow"], yellow: ["blue", "green"] }
     };
 
     // Which colors can serve as foil patches for each color
@@ -190,57 +191,58 @@
     /* -------------------------------------------------------
        GENERATE TRIAL TIMELINE VARIABLES (XX trials)
     ------------------------------------------------------- */
-    function generate_timeline_variables_original(wm_words_original){
+    function generate_timeline_variables_original(wm_words_original, repetitions = 1) {
       const trials_original = [];
       let idx = 0;
+      for (let rep = 0; rep < repetitions; rep++) {
+        for (const [wm_color, words] of Object.entries(wm_words_original)) {
+          for (const wm_word of words) {
 
-      for (const [wm_color, words] of Object.entries(wm_words_original)) {
-        for (const wm_word of words) {
+            // Condition 1: stim_congruent=true, wm_congruent=true
+            trials_original.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: wm_color,
+              wm_probe: wm_word,
+              stim_congruent: true,
+              wm_congruent: true,
+            });
 
-          // Condition 1: stim_congruent=true, wm_congruent=true
-          trials_original.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: wm_color,
-            wm_probe: wm_word,
-            stim_congruent: true,
-            wm_congruent: true,
-          });
+            // Condition 2: stim_congruent=true, wm_congruent=false
+            const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word], 1)[0];
+            console.log(curr_wm_probe_cong);
+            trials_original.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: wm_color,
+              wm_probe: curr_wm_probe_cong,
+              stim_congruent: true,
+              wm_congruent: false,
+            });
 
-          // Condition 2: stim_congruent=true, wm_congruent=false
-          const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word],1)[0];
-          console.log(curr_wm_probe_cong);
-          trials_original.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: wm_color,
-            wm_probe: curr_wm_probe_cong,
-            stim_congruent: true,
-            wm_congruent: false,
-          });
+            // Condition 3: stim_congruent=false, wm_congruent=true
+            const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+            trials_original.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: patch_foil_c3,
+              wm_probe: wm_word,
+              stim_congruent: false,
+              wm_congruent: true,
+            });
 
-          // Condition 3: stim_congruent=false, wm_congruent=true
-          const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials_original.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: patch_foil_c3,
-            wm_probe: wm_word,
-            stim_congruent: false,
-            wm_congruent: true,
-          });
-
-          // Condition 4: stim_congruent=false, wm_congruent=false
-          const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4],1)[0];
-          trials_original.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: patch_foil_c4,
-            wm_probe: curr_wm_probe_incong,
-            stim_congruent: false,
-            wm_congruent: false,
-          });
+            // Condition 4: stim_congruent=false, wm_congruent=false
+            const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+            const curr_wm_probe_incong = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_original[wm_word][patch_foil_c4], 1)[0];
+            trials_original.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: patch_foil_c4,
+              wm_probe: curr_wm_probe_incong,
+              stim_congruent: false,
+              wm_congruent: false,
+            });
+          }
         }
       }
       return trials_original
@@ -249,7 +251,7 @@
     function generate_timeline_variables_semantic(wm_words_semantic) {
       const trials_semantic = [];
       let idx = 0;
-      
+
       for (const [wm_color, words] of Object.entries(wm_words_semantic)) {
         for (const wm_word of words) {
 
@@ -300,7 +302,7 @@
     }
 
     const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
-    const all_trials_original = generate_timeline_variables_original(wm_words_original);
+    const all_trials_original = generate_timeline_variables_original(wm_words_original, 3);
     const all_trials = [...all_trials_semantic, ...all_trials_original];
 
     /* -------------------------------------------------------
@@ -324,10 +326,10 @@
        TIMELINE
     ------------------------------------------------------- */
     const timeline = [];
-    const n_main_trials = all_trials.length; // 48
+    const n_main_trials = all_trials.length; // 96
+    const n_trials_block = 24;
 
     // --- Fullscreen ---
-    /*
     timeline.push({
       type: jsPsychFullscreen,
       fullscreen_mode: true,
@@ -413,7 +415,6 @@
        Shows each color patch one at a time; participant must
        press the correct key before moving on.
     ------------------------------------------------------- */
-    /*
     timeline.push({
       type: jsPsychHtmlButtonResponse,
       stimulus: `
@@ -497,7 +498,6 @@
     /* -------------------------------------------------------
        PRACTICE BLOCK (10 trials, with feedback)
     ------------------------------------------------------- */
-    /*
     var practice_block = {
       timeline: [{
         type: jsPsychWMStroop,
@@ -518,15 +518,14 @@
       randomize_order: true,
     };
 
-    //timeline.push(practice_block);
-    /*
+    timeline.push(practice_block);
 
     // Transition from practice to main task
     timeline.push({
       type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p><strong>Practice complete!</strong></p>
-        <p>The main experiment will now begin. There are <strong>48 trials</strong> split into two blocks of 24.</p>
+        <p>The main experiment will now begin. There are <strong>96 trials</strong> split into four blocks of 24.</p>
         <p>You will <strong>not</strong> receive feedback during the main task.</p>
         <p>Take a moment to review the key mappings if needed:</p>
         <table class="key-mapping-table">
@@ -559,80 +558,63 @@
 
     // Randomize all 48 trials then split into two halves
     const shuffled_trials = jsPsych.randomization.shuffle(all_trials);
-    //const block1_trials = shuffled_trials.slice(0, 24);
-    //const block2_trials = shuffled_trials.slice(24, 48);
+    const block1_trials = shuffled_trials.slice(0, 24);
+    const block2_trials = shuffled_trials.slice(24, 48);
+    const block3_trials = shuffled_trials.slice(48, 72);
+    const block4_trials = shuffled_trials.slice(72, 96);
 
-    var block1 = {
-      timeline: [{
-        type: jsPsychWMStroop,
-        is_practice: false,
-        wm_word: jsPsych.timelineVariable('wm_word'),
-        wm_color: jsPsych.timelineVariable('wm_color'),
-        patch_color: jsPsych.timelineVariable('patch_color'),
-        wm_probe: jsPsych.timelineVariable('wm_probe'),
-        stim_congruent: jsPsych.timelineVariable('stim_congruent'),
-        wm_congruent: jsPsych.timelineVariable('wm_congruent'),
-        task_trial_index: jsPsych.timelineVariable('task_trial_index'),
-        on_finish: updateCounter,
-      }],
-      //timeline_variables: block1_trials,
-      timeline_variables: shuffled_trials
-    };
-    /*
-    var block2 = {
-      timeline: [{
-        type: jsPsychWMStroop,
-        is_practice: false,
-        wm_word: jsPsych.timelineVariable('wm_word'),
-        wm_color: jsPsych.timelineVariable('wm_color'),
-        patch_color: jsPsych.timelineVariable('patch_color'),
-        wm_probe: jsPsych.timelineVariable('wm_probe'),
-        stim_congruent: jsPsych.timelineVariable('stim_congruent'),
-        wm_congruent: jsPsych.timelineVariable('wm_congruent'),
-        task_trial_index: jsPsych.timelineVariable('task_trial_index'),
-        on_finish: updateCounter,
-      }],
-      timeline_variables: block2_trials,
-    };
-    */
+    function makeBlock(trials) {
+      return {
+        timeline: [{
+          type: jsPsychWMStroop,
+          is_practice: false,
+          wm_word: jsPsych.timelineVariable('wm_word'),
+          wm_color: jsPsych.timelineVariable('wm_color'),
+          patch_color: jsPsych.timelineVariable('patch_color'),
+          wm_probe: jsPsych.timelineVariable('wm_probe'),
+          stim_congruent: jsPsych.timelineVariable('stim_congruent'),
+          wm_congruent: jsPsych.timelineVariable('wm_congruent'),
+          task_trial_index: jsPsych.timelineVariable('task_trial_index'),
+          on_finish: updateCounter,
+        }],
+        timeline_variables: trials,
+      };
+    }
 
-    //timeline.push(block1);
-
-    // Midpoint break
-    timeline.push({
-      type: jsPsychHtmlButtonResponse,
-      stimulus: `
-        <p><strong>You're halfway through!</strong></p>
-        <p>Feel free to take a short break.</p>
-        <p>When you're ready, click "Continue" to start the second block.</p>
-      `,
-      choices: ["Continue"],
-    });
-
-    // Remind people of the key mappings
-    timeline.push({
-      type: jsPsychHtmlButtonResponse,
-      stimulus: `
-        <p>As a reminder, here are the key mappings:</p>
-        <table class="key-mapping-table">
+    function breakScreen(blockNum, totalBlocks) {
+      return {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+          <p><strong>Block ${blockNum - 1} of ${totalBlocks} complete!</strong></p>
+          <p>Feel free to take a short break.</p>
+          <p>As a reminder, here are the key mappings:</p>
+          <table class="key-mapping-table">
             <tr>
-                <td><div style="width:80px; height:60px; background-color:rgb(0,0,255);"></div></td>
-                <td><div style="width:80px; height:60px; background-color:rgb(25,200,25);"></div></td>
-                <td><div style="width:80px; height:60px; background-color:rgb(225,215,40);"></div></td>
-                <td><div style="width:80px; height:60px; background-color:rgb(255,0,0);"></div></td>
+              <td><div style="width:80px; height:60px; background-color:rgb(0,0,255);"></div></td>
+              <td><div style="width:80px; height:60px; background-color:rgb(25,200,25);"></div></td>
+              <td><div style="width:80px; height:60px; background-color:rgb(225,215,40);"></div></td>
+              <td><div style="width:80px; height:60px; background-color:rgb(255,0,0);"></div></td>
             </tr>
             <tr>
-                <td><kbd>D</kbd> Blue</td>
-                <td><kbd>F</kbd> Green</td>
-                <td><kbd>J</kbd> Yellow</td>
-                <td><kbd>K</kbd> Red</td>
+              <td><kbd>D</kbd> Blue</td>
+              <td><kbd>F</kbd> Green</td>
+              <td><kbd>J</kbd> Yellow</td>
+              <td><kbd>K</kbd> Red</td>
             </tr>
-        </table>
-    `,
-      choices: ["Got it!"],
-    });
+          </table>
+          <p><kbd>G</kbd> = Same &nbsp;&nbsp; <kbd>H</kbd> = Different</p>
+        `,
+        choices: ["Continue"],
+      };
+    }
 
-    //timeline.push(block2);
+    timeline.push(makeBlock(block1_trials));
+    //timeline.push(breakScreen(2, 4));
+    //timeline.push(makeBlock(block2_trials));
+    //timeline.push(breakScreen(3, 4));
+    //timeline.push(makeBlock(block3_trials));
+    //timeline.push(breakScreen(4, 4));
+    //timeline.push(makeBlock(block4_trials));
 
     /* -------------------------------------------------------
        IMAGERY QUESTIONNAIRES
@@ -642,9 +624,9 @@
       stimulus: '<p><b>Welcome to the second part of the study!</b></p><p>In this section, you will be presented with a series of statements. Please indicate your level of agreement or disagreement with each one.</p>',
       choices: ['Continue'],
 
-      on_start: function() {
-      // reset progress bar
-      jsPsych.setProgressBar(0);
+      on_start: function () {
+        // reset progress bar
+        jsPsych.setProgressBar(0);
       },
     });
 
@@ -695,9 +677,9 @@
 
     // Adjust the loop to chunk VVIQ items into groups of 4 and add to timeline with instructions
     for (let i = 0; i < vviq.length; i += 4) {
-        let itemsChunk = vviq.slice(i, i + 4); // Use slice to avoid modifying the original array
-        let instructionIndex = i / 4; // Calculate instruction index based on the current chunk
-        timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
+      let itemsChunk = vviq.slice(i, i + 4); // Use slice to avoid modifying the original array
+      let instructionIndex = i / 4; // Calculate instruction index based on the current chunk
+      timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
     }
 
     /*
@@ -759,7 +741,7 @@
           labels: ['1', '2', '3', '4', '5'],
           required: true
         })),
-        on_finish: function(data) {
+        on_finish: function (data) {
           // Attach additional data to the data object
           data.item_ids = itemsChunk.map(i => i.item_id);
           data.items = itemsChunk.map(i => i.item);
@@ -768,7 +750,7 @@
 
           //set progress bar value
           var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
-          jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
+          jsPsych.setProgressBar(curr_progress_bar_value + (1 / 20));
 
         }
       };
@@ -783,7 +765,7 @@
           labels: ['1', '2', '3', '4', '5'],
           required: true
         })),
-        on_finish: function(data) {
+        on_finish: function (data) {
           data.item_ids = itemsChunk.map(i => i.item_id);
           data.items = itemsChunk.map(i => i.item);
           data.categories = itemsChunk.map(i => i.category);
@@ -791,37 +773,37 @@
 
           //set progress bar value
           var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
-          jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
-          
+          jsPsych.setProgressBar(curr_progress_bar_value + (1 / 20));
+
         }
       };
     }
 
     function generateVVIQTrial(itemsChunk, instructionIndex) {
-        return {
-            type: jsPsychSurveyMultiChoice,
-            preamble: `<div class="vviq-instructions">${vviqInstructions[instructionIndex]}</div>`, // Include the prompt
-            questions: itemsChunk.map(item => ({
-                prompt: item.item,
-                options: ['No image at all, I only "know" I am thinking of the object',
-                          'Dim and vague image',
-                          'Moderately realistic and vivid',
-                          'Realistic and reasonably vivid',
-                          'Perfectly realistic, as vivid as real seeing'],
-                required: true
-            })),
-            on_finish: function(data) {
-                // Data processing
-                data.item_ids = itemsChunk.map(i => i.item_id);
-                data.items = itemsChunk.map(i => i.item);
-                data.categories = itemsChunk.map(i => i.category);
-                data.questionnaires = itemsChunk.map(i => i.questionnaire);
+      return {
+        type: jsPsychSurveyMultiChoice,
+        preamble: `<div class="vviq-instructions">${vviqInstructions[instructionIndex]}</div>`, // Include the prompt
+        questions: itemsChunk.map(item => ({
+          prompt: item.item,
+          options: ['No image at all, I only "know" I am thinking of the object',
+            'Dim and vague image',
+            'Moderately realistic and vivid',
+            'Realistic and reasonably vivid',
+            'Perfectly realistic, as vivid as real seeing'],
+          required: true
+        })),
+        on_finish: function (data) {
+          // Data processing
+          data.item_ids = itemsChunk.map(i => i.item_id);
+          data.items = itemsChunk.map(i => i.item);
+          data.categories = itemsChunk.map(i => i.category);
+          data.questionnaires = itemsChunk.map(i => i.questionnaire);
 
-                //set progress bar value
-                var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
-                jsPsych.setProgressBar(curr_progress_bar_value + (1/20));
-            }
-        };
+          //set progress bar value
+          var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+          jsPsych.setProgressBar(curr_progress_bar_value + (1 / 20));
+        }
+      };
     }
 
   </script>
