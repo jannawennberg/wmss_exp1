@@ -61,7 +61,7 @@ var irq = [
   },
   {
     "item_id": "irq-ortho-3",
-    "item": "I see words in my \"mind’s eye\" when I think.",
+    "item": "I see words in my \"mind\’s eye\" when I think.",
     "category": "orthographic",
     "questionnaire": "irq"
   },
@@ -223,7 +223,7 @@ var irq = [
   },
   {
     "item_id": "irq-catch-1",
-    "item": "The word ‘hotel’ has three letters.",
+    "item": "The word \‘hotel\’ has three letters.",
     "category": "catch",
     "questionnaire": "irq"
   }
@@ -316,7 +316,7 @@ var osivq = [
   },
   {
     "item_id": "osviq-object-15",
-    "item": "When I hear a radio announcer or a DJ I’ve never actually seen, I usually find myself picturing what he or she might look like.",
+    "item": "When I hear a radio announcer or a DJ I\’ve never actually seen, I usually find myself picturing what he or she might look like.",
     "category": "visual",
     "questionnaire": "osivq"
   },
@@ -442,7 +442,7 @@ var osivq = [
   },
   {
     "item_id": "osviq-verbal-6",
-    "item": "Putting together furniture kits (e.g. a TV stand or a chair)is much easier for me when I have detailed verbal instructions than when I only have a diagram or picture.",
+    "item": "Putting together furniture kits (e.g. a TV stand or a chair) is much easier for me when I have detailed verbal instructions than when I only have a diagram or picture.",
     "category": "verbal",
     "questionnaire": "osivq"
   },
@@ -490,7 +490,7 @@ var osivq = [
   },
   {
     "item_id": "osviq-verbal-14",
-    "item": "I enjoy being able to rephrase my thoughts in many ways for variety’s sake in both writing and speaking.",
+    "item": "I enjoy being able to rephrase my thoughts in many ways for variety\’s sake in both writing and speaking.",
     "category": "verbal",
     "questionnaire": "osivq"
   },

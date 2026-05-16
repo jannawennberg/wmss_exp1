@@ -6,12 +6,14 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="https://unpkg.com/jspsych@7.3.4"></script>
   <script src="jspsych_lib/jspsych-wm-stroop.js"></script>
-  <script src="jspsych_lib/jspsych.css" rel="stylesheet" type="text/css"></script>
+  <link href="jspsych_lib/jspsych.css" rel="stylesheet" type="text/css">
   <script src="jspsych_lib/questionnaires.js"></script>
   <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
   <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
   <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-multi-select@1.1.3"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.2.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.2.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.4"></script>
@@ -50,7 +52,7 @@
       padding: 6px 12px;
     }
 
-      /* Custom style for vviq instructions */
+    /* Custom style for vviq instructions */
     .vviq-instructions {
       font-weight: bold;
       font-size: larger;
@@ -594,7 +596,7 @@
     };
     */
 
-    timeline.push(block1);
+    //timeline.push(block1);
 
     // Midpoint break
     timeline.push({
@@ -671,7 +673,7 @@
       <p>Visual imagery refers to the ability to visualize, that is, the ability to form mental pictures, or to “see in the mind\'s eye.”</p>
       <p>The aim of this test is to determine the vividness of your visual imagery. The items of the test will possibly bring certain images to your mind.</p>
       <p>You are asked to rate the vividness of each image by reference to the 5-point scale given below: '
-        <ul>
+        <ul style="display: inline-block; text-align: left;">
           <li>1: No image at all</li>
           <li>2: Vague and dim</li>
           <li>3: Moderately clear and vivid</li>
@@ -685,10 +687,10 @@
 
     // Instruction messages for each VVIQ screen
     const vviqInstructions = [
-      "In answering items 1 to 4, think of some relative or friend whom you frequently see and consider carefully the picture that comes your mind’s eye.",
-      "In answering items 5 to 8, visualize a sun. Consider the picture that comes before you in your mind's eye.",
-      "In answering items 9 to 12, think of the front of a shop you often go to. Consider the picture that comes before you in your mind's eye.",
-      "Finally, think of the front of a country scene which involves trees, mountains, and a lake. Consider the picture that comes before you mind's eye."
+      "In answering items 1 to 4, think of some relative or friend whom you frequently see and consider carefully the picture that comes your mind\’s eye.",
+      "In answering items 5 to 8, visualize a sun. Consider the picture that comes before your mind\'s eye.",
+      "In answering items 9 to 12, think of the front of a shop you often go to. Consider the picture that comes before your mind\'s eye.",
+      "Finally, think of the front of a country scene which involves trees, mountains, and a lake. Consider the picture that comes before your mind\'s eye."
     ];
 
     // Adjust the loop to chunk VVIQ items into groups of 4 and add to timeline with instructions
@@ -698,6 +700,7 @@
         timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
     }
 
+    /*
     timeline.push({
       type: jsPsychPipe,
       action: "save",
@@ -705,6 +708,7 @@
       filename: filename,
       data_string: () => jsPsych.data.get().csv()
     });
+    */
 
     /* -------------------------------------------------------
        END SCREEN
