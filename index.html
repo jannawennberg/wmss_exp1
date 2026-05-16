@@ -94,7 +94,7 @@
        PARTICIPANT ID
     ------------------------------------------------------- */
     const participant_id = jsPsych.randomization.randomID(10);
-    const filename = `${participant_id}.csv`;
+    const filename = `wmss_exp1_${participant_id}.csv`;
     jsPsych.data.addProperties({ participant_id });
 
     /* -------------------------------------------------------
@@ -682,15 +682,14 @@
       timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
     }
 
-    /*
+    // save data
     timeline.push({
       type: jsPsychPipe,
       action: "save",
-      experiment_id: "nOzneBoLKNCo",
+      experiment_id: "o8dbs19eX6SM",
       filename: filename,
       data_string: () => jsPsych.data.get().csv()
     });
-    */
 
     /* -------------------------------------------------------
        END SCREEN
