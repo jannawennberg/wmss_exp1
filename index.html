@@ -88,6 +88,11 @@
     const jsPsych = initJsPsych({
       show_progress_bar: true,
       auto_update_progress_bar: false,
+      on_finish: () => {
+        // Redirect to SONA completion URL
+        const sona_url = `https://ucsd.sona-systems.com/webstudy_credit.aspx?experiment_id=3100&credit_token=16f5baca2fc44b4b945a45acf09e6cb5&survey_code=${raw_sona_id}`;
+        window.location = sona_url;
+    }
     });
 
     /* -------------------------------------------------------
@@ -96,6 +101,13 @@
     const participant_id = jsPsych.randomization.randomID(10);
     const filename = `wmss_exp1_${participant_id}.csv`;
     jsPsych.data.addProperties({ participant_id });
+
+    // Get the SONA id from url parameters
+    const url_params = new URLSearchParams(window.location.search);
+    const raw_sona_id = url_params.get('participant');
+    if (raw_sona_id){
+        jsPsych.data.addProperties({ raw_sona_id });
+    }
 
     /* -------------------------------------------------------
        STIMULUS MATERIALS
@@ -661,6 +673,17 @@
       timeline.push(generateVVIQTrial(itemsChunk, instructionIndex));
     }
 
+    /* -------------------------------------------------------
+       END SCREEN
+    ------------------------------------------------------- */
+    timeline.push({
+      type: jsPsychInstructions,
+      pages: ['<p>Thank you for participating!</p><p>Press "Back to SONA" to be taken back to SONA</p><p><strong>You must do so in order to receive credit!</strong></p>'
+      ],
+      show_clickable_nav: true,
+      button_label_next: 'Back to SONA',
+    }); 
+
     // save data
     timeline.push({
       type: jsPsychPipe,
@@ -670,34 +693,8 @@
       data_string: () => jsPsych.data.get().csv()
     });
 
-    /* -------------------------------------------------------
-       END SCREEN
-    ------------------------------------------------------- */
-    timeline.push({
-      type: jsPsychHtmlButtonResponse,
-      stimulus: `
-        <p><strong>Thank you for participating!</strong></p>
-        <p>Your responses have been recorded.</p>
-        <p>Click "Back to SONA" to be taken back to SONA and to receive credit</p>
-      `,
-      choices: ["Finish"],
-    });
-
-    // Exit fullscreen
-    timeline.push({
-      type: jsPsychFullscreen,
-      fullscreen_mode: false,
-    });
-
-    timeline.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `
-        <p>You may now close this window!</p>
-      `,
-      choices: [],
-    });
-
     jsPsych.run(timeline);
+    
 
     /* -------------------------------------------------------
        Imagery helper functions
