@@ -314,12 +314,12 @@
       { wm_color: "green", wm_word: "broccoli", patch_color: "red", wm_probe: "broccoli", stim_congruent: false, wm_congruent: true },
       { wm_color: "yellow", wm_word: "banana", patch_color: "yellow", wm_probe: "lime", stim_congruent: true, wm_congruent: false },
       { wm_color: "red", wm_word: "strawberry", patch_color: "blue", wm_probe: "corn", stim_congruent: false, wm_congruent: false },
-      { wm_color: "blue", wm_word: "ocean", patch_color: "green", wm_probe: "ocean", stim_congruent: false, wm_congruent: true },
-      { wm_color: "green", wm_word: "lime", patch_color: "green", wm_probe: "lime", stim_congruent: true, wm_congruent: true },
-      { wm_color: "yellow", wm_word: "lemon", patch_color: "yellow", wm_probe: "lemon", stim_congruent: true, wm_congruent: true },
-      { wm_color: "red", wm_word: "tomato", patch_color: "red", wm_probe: "banana", stim_congruent: true, wm_congruent: false },
-      { wm_color: "blue", wm_word: "water", patch_color: "blue", wm_probe: "water", stim_congruent: true, wm_congruent: true },
-      { wm_color: "green", wm_word: "lettuce", patch_color: "yellow", wm_probe: "blood", stim_congruent: false, wm_congruent: false },
+      { wm_color: "blue", wm_word: "blue", patch_color: "green", wm_probe: "blue", stim_congruent: false, wm_congruent: true },
+      { wm_color: "green", wm_word: "green", patch_color: "green", wm_probe: "green", stim_congruent: true, wm_congruent: true },
+      { wm_color: "yellow", wm_word: "yellow", patch_color: "yellow", wm_probe: "yellow", stim_congruent: true, wm_congruent: true },
+      { wm_color: "red", wm_word: "red", patch_color: "red", wm_probe: "yellow", stim_congruent: true, wm_congruent: false },
+      { wm_color: "blue", wm_word: "water", patch_color: "blue", wm_probe: "blue", stim_congruent: true, wm_congruent: true },
+      { wm_color: "green", wm_word: "green", patch_color: "yellow", wm_probe: "red", stim_congruent: false, wm_congruent: false },
     ];
 
     /* -------------------------------------------------------
@@ -340,33 +340,12 @@
       type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p><strong>Welcome to the Memory Experiment!</strong></p>
-        <p>This study will take approximately 10-15 minutes.</p>
+        <p>This study will take approximately 45-50 minutes.</p>
         <p><strong>To complete this experiment, you must be on a laptop or desktop computer with a physical keyboard.</strong></p>
+        <p>You must also be <strong>fluent in English</strong> and have normal or corrected-to-normal <strong>color vision</strong>.</strong></p>
         <p>Press "Continue" to the Consent Form.</p>
       `,
       choices: ["Continue"],
-    });
-
-    // --- Consent placeholder ---
-    timeline.push({
-      type: jsPsychHtmlButtonResponse,
-      stimulus: `
-        <div id="consentDiv">
-          <p><strong>Informed Consent</strong></p>
-          <p>This is a study conducted on working memory for a course project. All data collected will be kept confidential and anonymous, and used only for academic purposes. Participation in this study is entirely voluntary, and you may choose to stop and withdraw at any point without penalty. The task will take approximately 10-15 minutes to complete.</p>
-
-          <p>There are minimal risks from participating in this study. Participants may experience boredom, fatigue, or frustration from the large number of repetitive trials. In addition, the working memory task may create cognitive load that causes discomfort for some participants. Participants who have photosensitive epilepsy or other vision-related problems may have negative reactions to the flashing stimuli. Other bodily risks include eye strain and wrist pain that comes from responding to the online task for an extended amount of time. These risks do not exceed the risks a person may encounter in their daily lives.</p>
-
-          <p>This study may contribute to a better understanding of how information held in working memory influences perception. By extending prior research on the Stroop effect, which has primarily focused on direct color words, this study may benefit the field by examining whether moderate semantic associations are sufficient to produce similar interference effects. There is no direct compensation provided for participation in this study.</p>
-
-          <p>Continuing this study indicates that you consent to participating in this study.</p>
-
-          <p>By clicking <strong>I Agree</strong> you confirm that you are <strong>on a device with a physical keyboard</strong>, you are at least <strong>18 years old</strong>, you are <strong>fluent in English</strong>, you have normal or corrected-to-normal <strong>color vision</strong>, and you <strong>do not have photosensitive epilepsy.</strong></p>
-
-          <p>If you do not consent to participate, feel free to close the experiment in your internet browser. Your data will not be recorded.</p>
-        </div>
-      `,
-      choices: ["I Agree"],
     });
 
     // --- Task instructions ---
@@ -473,7 +452,7 @@
         }
       ],
       timeline_variables: key_training_trials,
-      repetitions: 1,
+      repetitions: 5,
       randomize_order: true,
     };
 
@@ -609,12 +588,12 @@
     }
 
     timeline.push(makeBlock(block1_trials));
-    //timeline.push(breakScreen(2, 4));
-    //timeline.push(makeBlock(block2_trials));
-    //timeline.push(breakScreen(3, 4));
-    //timeline.push(makeBlock(block3_trials));
-    //timeline.push(breakScreen(4, 4));
-    //timeline.push(makeBlock(block4_trials));
+    timeline.push(breakScreen(2, 4));
+    timeline.push(makeBlock(block2_trials));
+    timeline.push(breakScreen(3, 4));
+    timeline.push(makeBlock(block3_trials));
+    timeline.push(breakScreen(4, 4));
+    timeline.push(makeBlock(block4_trials));
 
     /* -------------------------------------------------------
        IMAGERY QUESTIONNAIRES
