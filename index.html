@@ -114,7 +114,7 @@
     ------------------------------------------------------- */
 
     // Color definitions (same values as in paper)
-    // Key mappings (for now): d=blue, f=green, j=yellow, k=red
+    // Key mappings: d=blue, f=green, j=yellow, k=red
     const color_info = {
       blue: { rgb: [0, 0, 255], key: 'd', css: 'rgb(0,0,255)' },
       green: { rgb: [25, 200, 25], key: 'f', css: 'rgb(25,200,25)' },
@@ -138,20 +138,20 @@
     };
 
     // Foil probes for congruent-Stroop / mismatch WM trials
-    // (patch color = wm_word color, so probe word just needs to differ from wm_color)
+    // (patch color = wm_word color, so probe word needs to differ from wm_color—have 3 options)
     const congruent_stroop_probes_semantic = {
-      sky: "broccoli", // blue green
-      ocean: "banana", // blue yellow
-      water: "strawberry", // blue red
-      broccoli: "sky", // green blue
-      lime: "blood", // green red
-      lettuce: "lemon", // green yellow
-      banana: "lime", // yellow green
-      lemon: "tomato", // yellow red
-      corn: "ocean", // yellow blue
-      strawberry: "water", // red blue
-      blood: "corn", // red yellow
-      tomato: "lettuce", // red green
+      sky:        ["broccoli", "lime", "lettuce", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      ocean:      ["broccoli", "lime", "lettuce", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      water:      ["broccoli", "lime", "lettuce", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      broccoli:   ["sky", "ocean", "water", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      lime:       ["sky", "ocean", "water", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      lettuce:    ["sky", "ocean", "water", "banana", "lemon", "corn", "strawberry", "blood", "tomato"],
+      banana:     ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "strawberry", "blood", "tomato"],
+      lemon:      ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "strawberry", "blood", "tomato"],
+      corn:       ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "strawberry", "blood", "tomato"],
+      strawberry: ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "banana", "lemon", "corn"],
+      blood:      ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "banana", "lemon", "corn"],
+      tomato:     ["sky", "ocean", "water", "broccoli", "lime", "lettuce", "banana", "lemon", "corn"],
     };
 
     const congruent_stroop_probes_original = {
@@ -161,27 +161,24 @@
       red: ["blue", "green", "yellow"]
     };
 
-    // For incongruent AND mismatch trials, here are the probe words
+    // For incongruent AND mismatch trials, here are the probe words (have two color options)
     const incongruent_probes_semantic = {
-      // blue words — probe can't be blue blue, probe can't be patch color
-      sky: { red: "broccoli", green: "lemon", yellow: "blood" },
-      ocean: { red: "lime", green: "banana", yellow: "tomato" },
-      water: { red: "lettuce", green: "corn", yellow: "strawberry" },
-
-      // green words — probe can't be green, probe can't be patch color
-      broccoli: { blue: "lemon", red: "sky", yellow: "water" },
-      lime: { blue: "corn", red: "ocean", yellow: "strawberry" },
-      lettuce: { blue: "banana", red: "water", yellow: "blood" },
-
-      // yellow words — probe can't be yellow, probe can't be patch color
-      banana: { blue: "tomato", green: "sky", red: "lettuce" },
-      lemon: { blue: "strawberry", green: "ocean", red: "lime" },
-      corn: { blue: "blood", green: "water", red: "broccoli" },
-
-      // red words — probe can't be red, probe can't match patch color
-      strawberry: { blue: "corn", green: "lemon", yellow: "sky" },
-      blood: { blue: "lettuce", green: "banana", yellow: "ocean" },
-      tomato: { blue: "lime", green: "water", yellow: "broccoli" },
+      // blue words
+      sky:        { red: ["broccoli","lime","lettuce","banana","lemon","corn"],    green: ["banana","lemon","corn","strawberry","blood","tomato"],    yellow: ["broccoli","lime","lettuce","strawberry","blood","tomato"] },
+      ocean:      { red: ["broccoli","lime","lettuce","banana","lemon","corn"],    green: ["banana","lemon","corn","strawberry","blood","tomato"],    yellow: ["broccoli","lime","lettuce","strawberry","blood","tomato"] },
+      water:      { red: ["broccoli","lime","lettuce","banana","lemon","corn"],    green: ["banana","lemon","corn","strawberry","blood","tomato"],    yellow: ["broccoli","lime","lettuce","strawberry","blood","tomato"] },
+      // green words
+      broccoli:   { blue: ["banana","lemon","corn","strawberry","blood","tomato"], red: ["sky","ocean","water","banana","lemon","corn"],             yellow: ["sky","ocean","water","strawberry","blood","tomato"] },
+      lime:       { blue: ["banana","lemon","corn","strawberry","blood","tomato"], red: ["sky","ocean","water","banana","lemon","corn"],             yellow: ["sky","ocean","water","strawberry","blood","tomato"] },
+      lettuce:    { blue: ["banana","lemon","corn","strawberry","blood","tomato"], red: ["sky","ocean","water","banana","lemon","corn"],             yellow: ["sky","ocean","water","strawberry","blood","tomato"] },
+      // yellow words
+      banana:     { blue: ["broccoli","lime","lettuce","strawberry","blood","tomato"], green: ["sky","ocean","water","strawberry","blood","tomato"], red: ["sky","ocean","water","broccoli","lime","lettuce"] },
+      lemon:      { blue: ["broccoli","lime","lettuce","strawberry","blood","tomato"], green: ["sky","ocean","water","strawberry","blood","tomato"], red: ["sky","ocean","water","broccoli","lime","lettuce"] },
+      corn:       { blue: ["broccoli","lime","lettuce","strawberry","blood","tomato"], green: ["sky","ocean","water","strawberry","blood","tomato"], red: ["sky","ocean","water","broccoli","lime","lettuce"] },
+      // red words
+      strawberry: { blue: ["broccoli","lime","lettuce","banana","lemon","corn"],   green: ["sky","ocean","water","banana","lemon","corn"],           yellow: ["sky","ocean","water","broccoli","lime","lettuce"] },
+      blood:      { blue: ["broccoli","lime","lettuce","banana","lemon","corn"],   green: ["sky","ocean","water","banana","lemon","corn"],           yellow: ["sky","ocean","water","broccoli","lime","lettuce"] },
+      tomato:     { blue: ["broccoli","lime","lettuce","banana","lemon","corn"],   green: ["sky","ocean","water","banana","lemon","corn"],           yellow: ["sky","ocean","water","broccoli","lime","lettuce"] },
     };
 
     const incongruent_probes_original = {
@@ -201,7 +198,7 @@
     };
 
     /* -------------------------------------------------------
-       GENERATE TRIAL TIMELINE VARIABLES (XX trials)
+       GENERATE TRIAL TIMELINE VARIABLES
     ------------------------------------------------------- */
     function generate_timeline_variables_original(wm_words_original, repetitions = 1) {
       const trials_original = [];
@@ -222,7 +219,6 @@
 
             // Condition 2: stim_congruent=true, wm_congruent=false
             const curr_wm_probe_cong = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_original[wm_word], 1)[0];
-            console.log(curr_wm_probe_cong);
             trials_original.push({
               task_trial_index: idx++,
               wm_color, wm_word,
@@ -260,61 +256,64 @@
       return trials_original
     }
 
-    function generate_timeline_variables_semantic(wm_words_semantic) {
+    function generate_timeline_variables_semantic(wm_words_semantic, repetitions = 1) {
       const trials_semantic = [];
       let idx = 0;
+      for (let rep = 0; rep < repetitions; rep++) {
+        for (const [wm_color, words] of Object.entries(wm_words_semantic)) {
+          for (const wm_word of words) {
 
-      for (const [wm_color, words] of Object.entries(wm_words_semantic)) {
-        for (const wm_word of words) {
+            // Condition 1: stim_congruent=true, wm_congruent=true
+            trials_semantic.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: wm_color,
+              wm_probe: wm_word,
+              stim_congruent: true,
+              wm_congruent: true,
+            });
 
-          // Condition 1: stim_congruent=true, wm_congruent=true
-          trials_semantic.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: wm_color,
-            wm_probe: wm_word,
-            stim_congruent: true,
-            wm_congruent: true,
-          });
+            // Condition 2: stim_congruent=true, wm_congruent=false
+            const wm_probe_c2 = jsPsych.randomization.sampleWithoutReplacement(congruent_stroop_probes_semantic[wm_word], 1)[0];
+            trials_semantic.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: wm_color,
+              wm_probe: wm_probe_c2,
+              stim_congruent: true,
+              wm_congruent: false,
+            });
 
-          // Condition 2: stim_congruent=true, wm_congruent=false
-          trials_semantic.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: wm_color,
-            wm_probe: congruent_stroop_probes_semantic[wm_word],
-            stim_congruent: true,
-            wm_congruent: false,
-          });
+            // Condition 3: stim_congruent=false, wm_congruent=true
+            const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+            trials_semantic.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: patch_foil_c3,
+              wm_probe: wm_word,
+              stim_congruent: false,
+              wm_congruent: true,
+            });
 
-          // Condition 3: stim_congruent=false, wm_congruent=true
-          const patch_foil_c3 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials_semantic.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: patch_foil_c3,
-            wm_probe: wm_word,
-            stim_congruent: false,
-            wm_congruent: true,
-          });
-
-          // Condition 4: stim_congruent=false, wm_congruent=false
-          const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
-          trials_semantic.push({
-            task_trial_index: idx++,
-            wm_color, wm_word,
-            patch_color: patch_foil_c4,
-            wm_probe: incongruent_probes_semantic[wm_word][patch_foil_c4],
-            stim_congruent: false,
-            wm_congruent: false,
-          });
+            // Condition 4: stim_congruent=false, wm_congruent=false
+            const patch_foil_c4 = other_colors[wm_color][Math.floor(Math.random() * other_colors[wm_color].length)];
+            const wm_probe_c4 = jsPsych.randomization.sampleWithoutReplacement(incongruent_probes_semantic[wm_word][patch_foil_c4], 1)[0]
+            trials_semantic.push({
+              task_trial_index: idx++,
+              wm_color, wm_word,
+              patch_color: patch_foil_c4,
+              wm_probe: wm_probe_c4,
+              stim_congruent: false,
+              wm_congruent: false,
+            });
+          }
         }
       }
       return trials_semantic;
     }
 
-    const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic);
-    const all_trials_original = generate_timeline_variables_original(wm_words_original, 3);
+    const all_trials_semantic = generate_timeline_variables_semantic(wm_words_semantic, 2);
+    const all_trials_original = generate_timeline_variables_original(wm_words_original, 6);
     const all_trials = [...all_trials_semantic, ...all_trials_original];
 
     /* -------------------------------------------------------
@@ -322,23 +321,25 @@
        mix, covering all 4 colors)
     ------------------------------------------------------- */
     const practice_trials = [
-      { wm_color: "blue", wm_word: "sky", patch_color: "blue", wm_probe: "sky", stim_congruent: true, wm_congruent: true },
-      { wm_color: "green", wm_word: "broccoli", patch_color: "red", wm_probe: "broccoli", stim_congruent: false, wm_congruent: true },
-      { wm_color: "yellow", wm_word: "banana", patch_color: "yellow", wm_probe: "lime", stim_congruent: true, wm_congruent: false },
-      { wm_color: "red", wm_word: "strawberry", patch_color: "blue", wm_probe: "corn", stim_congruent: false, wm_congruent: false },
-      { wm_color: "blue", wm_word: "blue", patch_color: "green", wm_probe: "blue", stim_congruent: false, wm_congruent: true },
-      { wm_color: "green", wm_word: "green", patch_color: "green", wm_probe: "green", stim_congruent: true, wm_congruent: true },
-      { wm_color: "yellow", wm_word: "yellow", patch_color: "yellow", wm_probe: "yellow", stim_congruent: true, wm_congruent: true },
-      { wm_color: "red", wm_word: "red", patch_color: "red", wm_probe: "yellow", stim_congruent: true, wm_congruent: false },
-      { wm_color: "blue", wm_word: "water", patch_color: "blue", wm_probe: "blue", stim_congruent: true, wm_congruent: true },
-      { wm_color: "green", wm_word: "green", patch_color: "yellow", wm_probe: "red", stim_congruent: false, wm_congruent: false },
+      // semantic words
+      { wm_color: "blue",   wm_word: "sky",        patch_color: "blue",   wm_probe: "sky",        stim_congruent: true,  wm_congruent: true  },
+      { wm_color: "green",  wm_word: "broccoli",   patch_color: "red",    wm_probe: "broccoli",   stim_congruent: false, wm_congruent: true  },
+      { wm_color: "yellow", wm_word: "banana",     patch_color: "yellow", wm_probe: "lime",        stim_congruent: true,  wm_congruent: false },
+      { wm_color: "red",    wm_word: "strawberry", patch_color: "blue",   wm_probe: "corn",        stim_congruent: false, wm_congruent: false },
+      { wm_color: "blue",   wm_word: "ocean",      patch_color: "green",  wm_probe: "ocean",       stim_congruent: false, wm_congruent: true  },
+      { wm_color: "green",  wm_word: "lettuce",    patch_color: "green",  wm_probe: "tomato",      stim_congruent: true,  wm_congruent: false },
+      // original words
+      { wm_color: "blue",   wm_word: "blue",       patch_color: "blue",   wm_probe: "blue",        stim_congruent: true,  wm_congruent: true  },
+      { wm_color: "green",  wm_word: "green",      patch_color: "green",  wm_probe: "yellow",      stim_congruent: true,  wm_congruent: false },
+      { wm_color: "yellow", wm_word: "yellow",     patch_color: "red",    wm_probe: "yellow",      stim_congruent: false, wm_congruent: true  },
+      { wm_color: "red",    wm_word: "red",        patch_color: "blue",   wm_probe: "green",       stim_congruent: false, wm_congruent: false },
     ];
 
     /* -------------------------------------------------------
        TIMELINE
     ------------------------------------------------------- */
     const timeline = [];
-    const n_main_trials = all_trials.length; // 96
+    const n_main_trials = all_trials.length; // 192
     const n_trials_block = 24;
 
     // --- Fullscreen ---
@@ -352,7 +353,7 @@
       type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p><strong>Welcome to the Memory Experiment!</strong></p>
-        <p>This study will take approximately 45-50 minutes.</p>
+        <p>This study will take approximately 60 minutes.</p>
         <p><strong>To complete this experiment, you must be on a laptop or desktop computer with a physical keyboard.</strong></p>
         <p>You must also be <strong>fluent in English</strong> and have normal or corrected-to-normal <strong>color vision</strong>.</strong></p>
         <p>Press "Continue" to the Consent Form.</p>
@@ -484,7 +485,6 @@
       `,
       choices: ["Start Practice"],
     });
-    /*
 
     /* -------------------------------------------------------
        PRACTICE BLOCK (10 trials, with feedback)
@@ -516,7 +516,7 @@
       type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p><strong>Practice complete!</strong></p>
-        <p>The main experiment will now begin. There are <strong>96 trials</strong> split into four blocks of 24.</p>
+        <p>The main experiment will now begin. There are <strong>192 trials</strong> split into eight blocks of 24.</p>
         <p>You will <strong>not</strong> receive feedback during the main task.</p>
         <p>Take a moment to review the key mappings if needed:</p>
         <table class="key-mapping-table">
@@ -547,13 +547,17 @@
       jsPsych.setProgressBar(trial_count / n_main_trials);
     };
 
-    // Randomize all 48 trials then split into two halves
+    // Randomize all trials
     const shuffled_trials = jsPsych.randomization.shuffle(all_trials);
     const block1_trials = shuffled_trials.slice(0, 24);
     const block2_trials = shuffled_trials.slice(24, 48);
     const block3_trials = shuffled_trials.slice(48, 72);
     const block4_trials = shuffled_trials.slice(72, 96);
-
+    const block5_trials = shuffled_trials.slice(96, 120);
+    const block6_trials = shuffled_trials.slice(120, 144);
+    const block7_trials = shuffled_trials.slice(144, 168);
+    const block8_trials = shuffled_trials.slice(168, 192);
+    
     function makeBlock(trials) {
       return {
         timeline: [{
@@ -600,12 +604,20 @@
     }
 
     timeline.push(makeBlock(block1_trials));
-    timeline.push(breakScreen(2, 4));
+    timeline.push(breakScreen(2, 8));
     timeline.push(makeBlock(block2_trials));
-    timeline.push(breakScreen(3, 4));
+    timeline.push(breakScreen(3, 8));
     timeline.push(makeBlock(block3_trials));
-    timeline.push(breakScreen(4, 4));
+    timeline.push(breakScreen(4, 8));
     timeline.push(makeBlock(block4_trials));
+    timeline.push(breakScreen(5, 8));
+    timeline.push(makeBlock(block5_trials));
+    timeline.push(breakScreen(6, 8));
+    timeline.push(makeBlock(block6_trials));
+    timeline.push(breakScreen(7, 8));
+    timeline.push(makeBlock(block7_trials));
+    timeline.push(breakScreen(8, 8));
+    timeline.push(makeBlock(block8_trials));
 
     /* -------------------------------------------------------
        IMAGERY QUESTIONNAIRES

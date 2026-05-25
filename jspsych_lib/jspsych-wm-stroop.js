@@ -280,7 +280,6 @@ var jsPsychWMStroop = (function (jsPsych) {
 				clearTimeout(wm_deadline); // cancel the deadline since they responded
 
 				wm_key_pressed = e.key.toLowerCase();
-				console.log(wm_key_pressed);
 				wm_rt = performance.now() - wm_response_start;
 				wm_correct = (wm_key_pressed === "g") === trial.wm_congruent;
 				console.log("Key pressed:", wm_key_pressed, "RT:", wm_rt, "Correct:", wm_correct);
